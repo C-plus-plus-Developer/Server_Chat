@@ -1,6 +1,6 @@
 #pragma once
 
-#include <memory>
+#include <memory> ---
 #include <vector>
 #include <string>
 #include <mutex>
@@ -14,9 +14,9 @@
 #include <cppconn/exception.h>
 #include <cppconn/prepared_statement.h>
 
-#include "sha1.h" // Твоя библиотека хеширования
+#include "sha1.h" 
 #include "User.h"
-#include "Messages.h" // Структура Message
+#include "Messages.h" 
 
 class DatabaseManager {
 private:
@@ -31,7 +31,7 @@ public:
                     const std::string& password, const std::string& database);
     ~DatabaseManager();
 
-    // --- Пользователи ---
+    // Пользователи 
     bool registerUser(const std::string& name, const std::string& login, const std::string& password);
     std::shared_ptr<User> authenticateUser(const std::string& login, const std::string& password);
     
@@ -46,7 +46,7 @@ public:
     int findUserIdByName(const std::string& name);
     int findUserIdByLogin(const std::string& login);
 
-    // --- Сообщения ---
+    // Сообщения:
     // Приватные
     bool savePrivateMessage(int senderId, int recipientId, const std::string& messageText);
     std::vector<Message> getPrivateMessages(const std::string& userLogin);
