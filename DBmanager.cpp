@@ -1,5 +1,5 @@
 #include "DBmanager.h"
-#include <algorithm> // для std::reverse
+#include <algorithm> 
 
 DatabaseManager::DatabaseManager(const std::string& host, const std::string& user, 
                                  const std::string& password, const std::string& database) {
@@ -12,13 +12,11 @@ DatabaseManager::DatabaseManager(const std::string& host, const std::string& use
         std::cout << "Database connected successfully!" << std::endl;
     } catch (sql::SQLException& e) {
         std::cerr << "DB Connection Error: " << e.what() << std::endl;
-        throw; // Пробрасываем исключение выше, чтобы остановить сервер
+        throw;
     }
 }
 
-DatabaseManager::~DatabaseManager() {
-    // connection закроется автоматически (unique_ptr)
-}
+DatabaseManager::~DatabaseManager() {}
 
 void DatabaseManager::createTables() {
     std::lock_guard<std::mutex> lock(dbMutex);
@@ -56,14 +54,12 @@ void DatabaseManager::createTables() {
     }
 }
 
-// ================= Пользователи =================
-
+// Пользователи
 bool DatabaseManager::registerUser(const std::string& name, const std::string& login, const std::string& password) {
     std::lock_guard<std::mutex> lock(dbMutex);
     try {
-        // Хешируем пароль (предполагаем, что у тебя есть MySha::sha1)
-        // Если функция другая, замени этот вызов
-        std::string hashedPassword = password; // MySha::sha1(password); 
+        // Хешируем пароль 
+        std::string hashedPassword = MySha::sha1(password); 
 
         std::unique_ptr<sql::PreparedStatement> stmt(
             connection->prepareStatement("INSERT INTO users(name, login, password) VALUES (?, ?, ?)")
@@ -82,8 +78,7 @@ bool DatabaseManager::registerUser(const std::string& name, const std::string& l
 std::shared_ptr<User> DatabaseManager::authenticateUser(const std::string& login, const std::string& password) {
     std::lock_guard<std::mutex> lock(dbMutex);
     try {
-        // std::string hashedPassword = MySha::sha1(password);
-        std::string hashedPassword = password;
+        std::string hashedPassword = MySha::sha1(password);
 
         std::unique_ptr<sql::PreparedStatement> stmt(
             connection->prepareStatement("SELECT id, name, login FROM users WHERE login = ? AND password = ? AND is_banned = 0")
@@ -194,8 +189,7 @@ int DatabaseManager::findUserIdByName(const std::string& name) {
     return -1;
 }
 
-// ================= Сообщения =================
-
+// Сообщения
 bool DatabaseManager::savePrivateMessage(int senderId, int recipientId, const std::string& messageText) {
     std::lock_guard<std::mutex> lock(dbMutex);
     try {
