@@ -7,13 +7,9 @@
 #include <algorithm>
 #include <sstream>
 
-// ==========================================
-// Конструктор и Деструктор
-// ==========================================
-
 Chat::Chat() : pool(50) {
     try {
-        // Убедитесь, что параметры подключения верны
+        //Замените на свою перед использованием
         dbManager = std::make_unique<DatabaseManager>("tcp://127.0.0.1:3306", "dbeaver", "dbeaver123", "bd");
     } catch (std::exception& e) {
         std::cerr << "[CRITICAL] Database connection failed: " << e.what() << std::endl;
@@ -24,10 +20,6 @@ Chat::Chat() : pool(50) {
 Chat::~Chat() {
     closeSocketSafe(serverSocket);
 }
-
-// ==========================================
-// Настройка и Запуск сервера
-// ==========================================
 
 void Chat::setup() {
     serverSocket = socket(AF_INET, SOCK_STREAM, 0);
@@ -84,7 +76,6 @@ void Chat::setup() {
         struct sockaddr_in clientAddr;
         socklen_t addrLen = sizeof(clientAddr);
         
-        // Используем локальные переменные, чтобы избежать гонки данных!
         int newClientSocket = ::accept(serverSocket, (sockaddr*)&clientAddr, &addrLen);
         
         if (newClientSocket == -1) {
@@ -114,10 +105,6 @@ void Chat::setup() {
         });
     }
 }
-
-// ==========================================
-// Сетевое взаимодействие (Чтение/Запись)
-// ==========================================
 
 void Chat::closeSocketSafe(int socket) {
     if (socket > 0) {
@@ -194,10 +181,6 @@ Chat::ReadResult Chat::readCommand(int socket, std::string& outCommand) {
     }
 }
 
-// ==========================================
-// Управление пользователями (Потокобезопасно)
-// ==========================================
-
 std::shared_ptr<User> Chat::getUserBySocket(int socket) {
     std::shared_lock<std::shared_mutex> lock(usersMutex);
     for (auto& userPtr : users) {
@@ -250,7 +233,7 @@ bool Chat::tryLoginUser(const std::string& login, int clientSocket, User& logged
             return true;
         }
     }
-    // Если пользователя нет в списке (новый), добавляем
+    // Если пользователя нет в списке, добавляем
     loggedInUser.clientSocket = clientSocket;
     users.push_back(std::make_shared<User>(loggedInUser));
     return true;
@@ -297,10 +280,6 @@ std::vector<User> Chat::getOnlineUsersCopy() {
     }
     return onlineUsers;
 }
-
-// ==========================================
-// Обработка клиента
-// ==========================================
 
 void Chat::cleanupClient(int socket) {
     if (socket <= 0) return;
@@ -371,7 +350,7 @@ bool Chat::processCommand(int socket, const std::string& command) {
             auto userPtr = getUserByLogin(loggedInUser.login);
             if (userPtr) {
                 UserPanel(socket, userPtr);
-                return false; // Выход из handleClient, так как UserPanel имеет свой цикл
+                return false; 
             }
         }
     } 
@@ -398,10 +377,6 @@ bool Chat::processCommand(int socket, const std::string& command) {
     
     return true;
 }
-
-// ==========================================
-// Логика приложения (Логин/Регистрация)
-// ==========================================
 
 bool Chat::Login(const std::string& login, const std::string& password, int clientSocket, User& loggedInUser) {
     if (dbManager->isUserBanned(login)) {
@@ -444,10 +419,6 @@ void Chat::AddNewUser(const std::string& login, const std::string& password, con
         sendResponse(clientSocket, "Registration failed! DB error.");
     }
 }
-
-// ==========================================
-// Панели управления (User/Admin)
-// ==========================================
 
 void Chat::UserPanel(int clientSocket, std::shared_ptr<User> user) {
     std::cout << "UserPanel started for " << user->name << std::endl;
@@ -546,10 +517,6 @@ void Chat::AdminPanel(int clientSocket) {
         }
     }
 }
-
-// ==========================================
-// Функции сообщений и информации
-// ==========================================
 
 void Chat::SendMessage(const std::string& recipientName, const std::string& message, int senderSocket, const User& sender) {
     int recipientId = dbManager->findUserIdByName(recipientName);
@@ -650,9 +617,7 @@ void Chat::PrintBannedUsers(int clientSocket) {
     sendResponse(clientSocket, ss.str());
 }
 
-// ==========================================
-// Админские действия
-// ==========================================
+// Админские методы:
 
 void Chat::banUser(const std::string& login, int adminSocket) {
     if (dbManager->banUser(login)) {
@@ -694,4 +659,5 @@ void Chat::deleteUser(const std::string& login, int adminSocket) {
     } else {
         sendResponse(adminSocket, "Delete failed.");
     }
+
 }
