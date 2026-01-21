@@ -27,43 +27,37 @@ public:
     void setup();
 
 private:
-    // --- Основные компоненты ---
     ThreadPool pool;
     std::unique_ptr<DatabaseManager> dbManager;
 
-    // --- Состояние сервера ---
+    // Состояние сервера
     int serverSocket;
     std::atomic<int> activeConnections{0};
     std::atomic<int> totalConnections{0};
 
-    // --- Хранение данных (Потокобезопасное) ---
-    // ВАЖНО: Храним shared_ptr, чтобы при реаллокации вектора указатели не ломались
-    // и чтобы можно было безопасно передавать пользователя в другие потоки
+    // Храним shared_ptr, чтобы при реаллокации вектора указатели не ломались
     std::vector<std::shared_ptr<User>> users;
-    mutable std::shared_mutex usersMutex; // shared_mutex для Readers-Writer lock
-
-    // --- Буферизация (для склейки TCP пакетов) ---
+    mutable std::shared_mutex usersMutex; 
+    
     // Хранит недочитанные команды для каждого сокета
     std::unordered_map<int, std::string> socketBuffers;
     std::mutex buffersMutex;
 
-    // --- Константы ---
     const int PORT = 7777;
     const int MESSAGE_LENGTH = 4096;
     
-    // Список администраторов (можно вынести в конфиг или БД)
+    // Список администраторов 
     const std::unordered_map<std::string, std::string> adminAkk = {
         {"admin", "admin123"},
         {"moder", "moder123"}
     };
 
-    // --- Вспомогательные методы чтения сети ---
     enum class ReadResult { SUCCESS, DISCONNECTED, WOULD_BLOCK, ERROR };
     
     // Читает данные из сокета, склеивает пакеты и возвращает полную команду
     ReadResult readCommand(int socket, std::string& outCommand);
     
-    // --- Потокобезопасные методы управления пользователями ---
+    //Потокобезопасные методы управления пользователями
     std::shared_ptr<User> getUserBySocket(int socket);
     std::shared_ptr<User> getUserByLogin(const std::string& login);
     std::shared_ptr<User> getUserByName(const std::string& name);
@@ -77,22 +71,21 @@ private:
     void removeUserByLogin(const std::string& login);
     void updateUserSocket(const std::string& login, int socket);
     
-    // Возвращает КОПИЮ списка пользователей (чтобы не держать лок во время обработки)
+    // Возвращает копию списка пользователей 
     std::vector<User> getOnlineUsersCopy();
 
-    // --- Логика обработки ---
+    // Логика обработки 
     void handleClient(int clientSocket);
     bool processCommand(int clientSocket, const std::string& command);
     
-    // --- Функции чата (Login / Register) ---
+    // Функции чата 
     bool Login(const std::string& login, const std::string& password, int clientSocket, User& loggedInUser);
     void AddNewUser(const std::string& login, const std::string& password, const std::string& name, int clientSocket);
     
-    // --- Панели взаимодействия ---
-    // Принимает shared_ptr, чтобы объект не удалился, пока пользователь внутри панели
+    //Принимает shared_ptr, чтобы объект не удалился, пока пользователь внутри панели
     void UserPanel(int clientSocket, std::shared_ptr<User> user);
     
-    // --- Сообщения ---
+    //Сообщения
     void SendMessage(const std::string& recipientName, const std::string& message, int senderSocket, const User& sender);
     void SendPublicMessage(const std::string& message, int senderSocket, const User& sender);
     
@@ -101,7 +94,7 @@ private:
     void PrintAllUsers(int clientSocket);
     void PrintOnlineUsers(int clientSocket);
 
-    // --- Админ панель ---
+    // Админ панель 
     bool AdminLogin(const std::string& login, const std::string& password);
     void AdminPanel(int clientSocket);
     void banUser(const std::string& login, int adminSocket);
@@ -109,9 +102,10 @@ private:
     void deleteUser(const std::string& login, int adminSocket);
     void PrintBannedUsers(int clientSocket);
 
-    // --- Сетевые утилиты ---
+    // Сетевые методы
     bool sendToClient(int socket, const std::string& message);
     void sendResponse(int clientSocket, const std::string& response);
     void closeSocketSafe(int socket);
     void cleanupClient(int socket);
+
 };
