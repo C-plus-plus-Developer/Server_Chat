@@ -1,3 +1,0 @@
-/home/pokupatel/Server_Chat/build/CMakeFiles/Chat_Server.dir
-/home/pokupatel/Server_Chat/build/CMakeFiles/edit_cache.dir
-/home/pokupatel/Server_Chat/build/CMakeFiles/rebuild_cache.dir

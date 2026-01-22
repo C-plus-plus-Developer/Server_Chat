@@ -1,1 +1,0 @@
-/usr/bin/g++ -g CMakeFiles/Chat_Server.dir/Chat_c++.cpp.o CMakeFiles/Chat_Server.dir/Chat.cpp.o CMakeFiles/Chat_Server.dir/DBmanager.cpp.o -o Chat_Server  /usr/lib/x86_64-linux-gnu/libmysqlcppconn.so /usr/lib/x86_64-linux-gnu/libmysqlclient.so /usr/lib/x86_64-linux-gnu/libssl.so /usr/lib/x86_64-linux-gnu/libcrypto.so -lpthread -ldl 
