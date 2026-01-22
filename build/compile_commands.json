@@ -1,0 +1,20 @@
+[
+{
+  "directory": "/home/pokupatel/Server_Chat/build",
+  "command": "/usr/bin/g++  -I/home/pokupatel/Server_Chat/build -I/home/pokupatel/Server_Chat -g -std=gnu++17 -std=c++17 -pthread -o CMakeFiles/Chat_Server.dir/Chat_c++.cpp.o -c /home/pokupatel/Server_Chat/Chat_c++.cpp",
+  "file": "/home/pokupatel/Server_Chat/Chat_c++.cpp",
+  "output": "CMakeFiles/Chat_Server.dir/Chat_c++.cpp.o"
+},
+{
+  "directory": "/home/pokupatel/Server_Chat/build",
+  "command": "/usr/bin/g++  -I/home/pokupatel/Server_Chat/build -I/home/pokupatel/Server_Chat -g -std=gnu++17 -std=c++17 -pthread -o CMakeFiles/Chat_Server.dir/Chat.cpp.o -c /home/pokupatel/Server_Chat/Chat.cpp",
+  "file": "/home/pokupatel/Server_Chat/Chat.cpp",
+  "output": "CMakeFiles/Chat_Server.dir/Chat.cpp.o"
+},
+{
+  "directory": "/home/pokupatel/Server_Chat/build",
+  "command": "/usr/bin/g++  -I/home/pokupatel/Server_Chat/build -I/home/pokupatel/Server_Chat -g -std=gnu++17 -std=c++17 -pthread -o CMakeFiles/Chat_Server.dir/DBmanager.cpp.o -c /home/pokupatel/Server_Chat/DBmanager.cpp",
+  "file": "/home/pokupatel/Server_Chat/DBmanager.cpp",
+  "output": "CMakeFiles/Chat_Server.dir/DBmanager.cpp.o"
+}
+]

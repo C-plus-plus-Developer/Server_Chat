@@ -1,6 +1,6 @@
 #pragma once
 
-#include <memory> ---
+#include <memory> 
 #include <vector>
 #include <string>
 #include <mutex>
@@ -22,15 +22,11 @@ class DatabaseManager {
 private:
     std::mutex dbMutex; // Мьютекс для защиты соединения
     std::unique_ptr<sql::Connection> connection;
-
-    // Внутренний метод для создания таблиц при старте
-    void createTables();
-
 public:
     DatabaseManager(const std::string& host, const std::string& user, 
                     const std::string& password, const std::string& database);
     ~DatabaseManager();
-
+    void createTables();
     // Пользователи 
     bool registerUser(const std::string& name, const std::string& login, const std::string& password);
     std::shared_ptr<User> authenticateUser(const std::string& login, const std::string& password);
@@ -44,12 +40,12 @@ public:
     bool isUserBanned(const std::string& login);
     
     int findUserIdByName(const std::string& name);
-    int findUserIdByLogin(const std::string& login);
 
     // Сообщения:
+    
     // Приватные
     bool savePrivateMessage(int senderId, int recipientId, const std::string& messageText);
-    std::vector<Message> getPrivateMessages(const std::string& userLogin);
+    std::vector<Message> getPrivateMessages(int userID);
     
     // Публичные
     bool savePublicMessage(int senderId, const std::string& senderName, const std::string& messageText);

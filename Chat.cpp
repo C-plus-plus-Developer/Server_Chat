@@ -9,10 +9,10 @@
 
 Chat::Chat() : pool(50) {
     try {
-        //Замените на свою перед использованием
         dbManager = std::make_unique<DatabaseManager>("tcp://127.0.0.1:3306", "dbeaver", "dbeaver123", "bd");
+        dbManager->createTables();
     } catch (std::exception& e) {
-        std::cerr << "[CRITICAL] Database connection failed: " << e.what() << std::endl;
+        std::cerr << "Database connection failed: " << e.what() << std::endl;
         exit(1);
     }
 }
@@ -599,12 +599,33 @@ void Chat::PrintPublicMessage(int clientSocket) {
     sendResponse(clientSocket, ss.str());
 }
 
+// Заменить метод PrintPrivateMessage на эту версию:
 void Chat::PrintPrivateMessage(int clientSocket, const User& user) {
-    auto msgs = dbManager->getPrivateMessages(user.login);
+    // Получаем ID пользователя
+    int userId = dbManager->findUserIdByName(user.name);
+    if (userId == -1) {
+        sendResponse(clientSocket, "User ID not found!");
+        return;
+    }
+    
+    // Используем метод с ID
+    auto msgs = dbManager->getPrivateMessages(userId);
+    
     std::stringstream ss;
     ss << "--- Private Chat ---\n";
+    if (msgs.empty()) {
+        ss << "No private messages.\n";
+    }
     for(const auto& m : msgs) {
-        ss << (m.from == user.name ? "You -> " : m.from + " -> ") << m.text << "\n";
+        // Исправленная логика отображения
+        if (m.from == user.name) {
+            // Сообщение отправлено текущим пользователем
+            ss << "You -> " << m.to << ": " << m.text << "\n";
+        } else if (m.to == user.name) {
+            // Сообщение получено текущим пользователем
+            ss << m.from << " -> You: " << m.text << "\n";
+        }
+        // Игнорируем сообщения между другими пользователями
     }
     sendResponse(clientSocket, ss.str());
 }

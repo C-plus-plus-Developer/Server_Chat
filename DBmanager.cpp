@@ -8,7 +8,7 @@ DatabaseManager::DatabaseManager(const std::string& host, const std::string& use
         connection.reset(driver->connect(host, user, password));
         connection->setSchema(database);
         
-        createTables(); // Создаем таблицы, если их нет
+        //createTables(); // Создаем таблицы, если их нет
         std::cout << "Database connected successfully!" << std::endl;
     } catch (sql::SQLException& e) {
         std::cerr << "DB Connection Error: " << e.what() << std::endl;
@@ -33,11 +33,12 @@ void DatabaseManager::createTables() {
 
         // Публичные сообщения
         stmt->execute("CREATE TABLE IF NOT EXISTS public_messages ("
-                      "id INT AUTO_INCREMENT PRIMARY KEY, "
-                      "sender_id INT, "
-                      "sender_name VARCHAR(255), "
-                      "message_text TEXT, "
-                      "timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
+              "id INT AUTO_INCREMENT PRIMARY KEY, "
+              "sender_id INT, "
+              "sender_name VARCHAR(255), " 
+              "message_text TEXT, "
+              "timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP, "
+              "FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE)"); 
 
         // Приватные сообщения
         stmt->execute("CREATE TABLE IF NOT EXISTS private_messages ("
@@ -207,7 +208,7 @@ bool DatabaseManager::savePrivateMessage(int senderId, int recipientId, const st
     }
 }
 
-std::vector<Message> DatabaseManager::getPrivateMessages(const std::string& userLogin) {
+std::vector<Message> DatabaseManager::getPrivateMessages(int userId) {  
     std::lock_guard<std::mutex> lock(dbMutex);
     std::vector<Message> messages;
     try {
@@ -216,11 +217,11 @@ std::vector<Message> DatabaseManager::getPrivateMessages(const std::string& user
             "FROM private_messages pm "
             "JOIN users u1 ON pm.sender_id = u1.id "
             "JOIN users u2 ON pm.recipient_id = u2.id "
-            "WHERE u1.login = ? OR u2.login = ? "
+            "WHERE pm.sender_id = ? OR pm.recipient_id = ? "  
             "ORDER BY pm.timestamp DESC LIMIT 50"
         ));
-        stmt->setString(1, userLogin);
-        stmt->setString(2, userLogin);
+        stmt->setInt(1, userId);    
+        stmt->setInt(2, userId);
         std::unique_ptr<sql::ResultSet> res(stmt->executeQuery());
         
         while(res->next()) {
@@ -230,13 +231,12 @@ std::vector<Message> DatabaseManager::getPrivateMessages(const std::string& user
             msg.text = res->getString("message_text");
             messages.push_back(msg);
         }
-        std::reverse(messages.begin(), messages.end()); // Разворачиваем для хронологии
+        std::reverse(messages.begin(), messages.end());
     } catch (sql::SQLException& e) {
         std::cerr << "GetPrivateMsg Error: " << e.what() << std::endl;
     }
     return messages;
 }
-
 bool DatabaseManager::savePublicMessage(int senderId, const std::string& senderName, const std::string& messageText) {
     std::lock_guard<std::mutex> lock(dbMutex);
     try {
